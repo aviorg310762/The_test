@@ -1,187 +1,238 @@
-<div class="py-8">
-    <div class="chat-container">
-        <div class="bg-blue-600 text-white py-4 px-6">
-            <h1 class="text-xl font-bold text-center">צ'אטבוט לתרגול מתמטיקה, גיאומטריה וטריגונומטריה</h1>
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <!-- Messages will be added here by JavaScript -->
-        </div>
-        
-        <div class="input-area">
-            <input type="text" class="message-input" id="messageInput" placeholder="הקלד/י את הודעתך כאן..." autocomplete="off">
-            <button class="send-button" id="sendButton">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>צ'אטבוט לתרגול מתמטיקה</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        /* עיצוב קיים */
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .chat-messages {
+            height: 550px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            margin-left: auto;
+        }
+        .bot-message {
+            background-color: #f3f4f6;
+            color: #111827;
+            margin-right: auto;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: #f3f4f6;
+        }
+        .message-input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+        }
+        .send-button {
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="py-8">
+        <div class="chat-container">
+            <div class="bg-blue-600 text-white py-4 px-6">
+                <h1 class="text-xl font-bold text-center">צ'אטבוט לתרגול מתמטיקה וגיאומטריה</h1>
+            </div>
 
-        <!-- כפתורי ניווט -->
-        <div class="flex justify-between mt-4 px-6">
-            <button id="backButton" class="option-button hidden">חזרה שלב אחורה</button>
-            <button id="restartButton" class="option-button hidden">חזרה להתחלה</button>
+            <!-- אזור הודעות -->
+            <div class="chat-messages" id="chatMessages"></div>
+
+            <!-- אזור קלט -->
+            <div class="input-area">
+                <input type="text" class="message-input" id="messageInput" placeholder="הקלד/י את הודעתך כאן..." autocomplete="off">
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- כפתורי ניווט -->
+            <div class="flex justify-between mt-4 px-6">
+                <button id="backButton" class="option-button hidden">חזרה שלב אחורה</button>
+                <button id="restartButton" class="option-button hidden">חזרה להתחלה</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const backButton = document.getElementById('backButton');
-        const restartButton = document.getElementById('restartButton');
-
-        // Bot state and history
-        let botState = {
-            stage: 'intro',
-            topic: null,
-            grade: null,
-            level: null,
-            exerciseType: null,
-            currentExercise: null,
-            userSolution: null,
-            hintsGiven: 0
-        };
-        
-        let history = []; // לשמירת מצבים קודמים
-
-        // Add event listeners
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        backButton.addEventListener('click', goBack);
-        restartButton.addEventListener('click', goToStart);
-
-        // Initial bot message
-        setTimeout(() => {
-            addBotMessage(`שלום! אני בוט לימודי שמסייע בתרגול מתמטיקה, גיאומטריה וטריגונומטריה לתלמידי חטיבת ביניים ותיכון.`);
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
             
+            const backButton = document.getElementById('backButton');
+            const restartButton = document.getElementById('restartButton');
+
+            // Bot state and history management
+            let botState = { stage: 'intro', topic: null };
+            let history = [];
+
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            backButton.addEventListener('click', goBack);
+            restartButton.addEventListener('click', goToStart);
+
+            // Initial bot message
             setTimeout(() => {
-                addBotMessage(`איזה נושא לימוד תרצה/י לתרגל?`, [
-                    'צורות גיאומטריות - חישובי שטחים, הקפים, ונפח',
-                    'משולשים - דמיון או חפיפה',
-                    'טריגונומטריה במשולש ישר זווית',
-                    'נושא אחר במתמטיקה'
-                ]);
-                showNavigationButtons();
+                addBotMessage("שלום! אני בוט לימודי שמסייע בתרגול מתמטיקה וגיאומטריה.");
+                setTimeout(() => {
+                    addBotMessage("איזה נושא תרצה/י לתרגל?", ["גיאומטריה", "משולשים", "טריגונומטריה"]);
+                    showNavigationButtons();
+                }, 500);
             }, 500);
-        }, 500);
 
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message === '') return;
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
 
-            addUserMessage(message);
-            messageInput.value = '';
+                addUserMessage(message);
+                messageInput.value = '';
 
-            // Save current state to history
-            history.push(JSON.parse(JSON.stringify(botState)));
+                // Save current state to history
+                history.push(JSON.parse(JSON.stringify(botState)));
 
-            // Process user message based on current state
-            processUserMessage(message);
-        }
+                // Process user message
+                processUserMessage(message);
+                showNavigationButtons();
+            }
 
-        function processUserMessage(message) {
-            setTimeout(() => {
-                switch(botState.stage) {
-                    case 'intro':
-                        processTopic(message);
-                        break;
-                    case 'grade':
-                        processGrade(message);
-                        break;
-                    case 'level':
-                        processLevel(message);
-                        break;
-                    case 'exerciseType':
-                        processExerciseType(message);
-                        break;
-                    case 'exercise':
-                        processExerciseSolution(message);
-                        break;
-                    default:
-                        defaultResponse();
+            function processUserMessage(message) {
+                setTimeout(() => {
+                    switch (botState.stage) {
+                        case 'intro':
+                            processTopic(message);
+                            break;
+                        default:
+                            addBotMessage("לא הבנתי את ההודעה שלך.");
+                    }
+                }, 500);
+            }
+
+            function processTopic(message) {
+                if (message.includes("גיאומטריה")) {
+                    botState.topic = "גיאומטריה";
+                    botState.stage = "exercise";
+                    addBotMessage("בחר תרגיל בגיאומטריה:", ["שטח", "היקף"]);
+                } else if (message.includes("משולשים")) {
+                    botState.topic = "משולשים";
+                    botState.stage = "exercise";
+                    addBotMessage("בחר תרגיל במשולשים:", ["דמיון", "חפיפה"]);
+                } else if (message.includes("טריגונומטריה")) {
+                    botState.topic = "טריגונומטריה";
+                    botState.stage = "exercise";
+                    addBotMessage("בחר תרגיל בטריגונומטריה:", ["סינוס", "קוסינוס"]);
+                } else {
+                    addBotMessage("לא הבנתי את הנושא שבחרת.");
                 }
-                showNavigationButtons(); // הצגת כפתורי ניווט
-            }, 500);
-        }
-
-        function goBack() {
-            if (history.length > 0) {
-                botState = history.pop(); // חזרה למצב הקודם
-                chatMessages.innerHTML = ''; // איפוס הודעות
-                addBotMessage(`חזרת לשלב הקודם.`);
                 showNavigationButtons();
-            } else {
-                addBotMessage(`אין שלבים קודמים לחזור אליהם.`);
+            }
+
+            function goBack() {
+                if (history.length > 0) {
+                    botState = history.pop();
+                    chatMessages.innerHTML = ''; // Clear messages
+                    addBotMessage("חזרת לשלב הקודם.");
+                } else {
+                    addBotMessage("אין שלבים קודמים לחזור אליהם.");
+                    hideNavigationButtons();
+                }
+                showNavigationButtons();
+            }
+
+            function goToStart() {
+                botState = { stage: 'intro', topic: null };
+                history = [];
+                chatMessages.innerHTML = ''; // Clear messages
+                addBotMessage("התחלת מחדש.");
+                
+                setTimeout(() => {
+                    addBotMessage("איזה נושא תרצה/י לתרגל?", ["גיאומטריה", "משולשים", "טריגונומטריה"]);
+                    showNavigationButtons();
+                }, 500);
+                
                 hideNavigationButtons();
             }
-        }
 
-        function goToStart() {
-            botState = { stage: 'intro', topic: null, grade: null, level: null, exerciseType: null, currentExercise: null, userSolution: null, hintsGiven: 0 };
-            history = []; // איפוס היסטוריה
-            chatMessages.innerHTML = ''; // איפוס הודעות
-            addBotMessage(`התחלת מחדש.`);
-            
-            setTimeout(() => {
-                addBotMessage(`איזה נושא לימוד תרצה/י לתרגל?`, [
-                    'צורות גיאומטריות - חישובי שטחים, הקפים, ונפח',
-                    'משולשים - דמיון או חפיפה',
-                    'טריגונומטריה במשולש ישר זווית',
-                    'נושא אחר במתמטיקה'
-                ]);
-                showNavigationButtons();
-            }, 500);
-        }
-
-        function showNavigationButtons() {
-            backButton.classList.remove('hidden');
-            restartButton.classList.remove('hidden');
-        }
-
-        function hideNavigationButtons() {
-            backButton.classList.add('hidden');
-            restartButton.classList.add('hidden');
-        }
-
-        function addBotMessage(message, options = []) {
-            const botDiv = document.createElement('div');
-            botDiv.className = 'bot-message message';
-            
-            botDiv.innerHTML = `<p>${message}</p>`;
-            
-            if (options.length > 0) {
-                const optionsContainer = document.createElement('div');
-                optionsContainer.className = 'options-container';
-                
-                options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.className = 'option-button';
-                    button.textContent = option;
-                    button.onclick = () => sendMessage(option);
-                    optionsContainer.appendChild(button);
-                });
-                
-                botDiv.appendChild(optionsContainer);
+            function showNavigationButtons() {
+                backButton.classList.remove('hidden');
+                restartButton.classList.remove('hidden');
             }
-            
-            chatMessages.appendChild(botDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
 
-        function addUserMessage(message) {
-            const userDiv = document.createElement('div');
-            userDiv.className = 'user-message message';
-            
-            userDiv.textContent = message;
-            
-            chatMessages.appendChild(userDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-    });
-</script>
+            function hideNavigationButtons() {
+                backButton.classList.add('hidden');
+                restartButton.classList.add('hidden');
+            }
+
+            function addBotMessage(message, options = []) {
+                const botDiv = document.createElement('div');
+                botDiv.className = 'bot-message message';
+                
+                botDiv.innerHTML = `<p>${message}</p>`;
+                
+                if (options.length > 0) {
+                    const optionsContainer = document.createElement('div');
+                    
+                    options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.className = 'option-button';
+                        button.textContent = option;
+                        button.onclick = () => sendMessage(option);
+                        optionsContainer.appendChild(button);
+                    });
+                    
+                    botDiv.appendChild(optionsContainer);
+                }
+                
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            }
+
+            function addUserMessage(message) {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'user-message message';
+                
+                userDiv.textContent = message;
+
+                chatMessages.appendChild(userDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+           }
+       });
+   </script>
+</body>
+</html>
