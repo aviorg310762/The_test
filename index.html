@@ -1,238 +1,727 @@
-!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אטבוט לתרגול מתמטיקה</title>
+    <title>בוט מתמטיקה - טריגונומטריה וגיאומטריה</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
     <style>
-        /* עיצוב קיים */
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cae;
+            --accent-color: #ff9800;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --success-color: #4CAF50;
+            --error-color: #F44336;
+            --warning-color: #FF9800;
+            --info-color: #2196F3;
+        }
+        
         body {
-            font-family: 'Rubik', sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            line-height: 1.6;
         }
+        
         .chat-container {
-            max-width: 800px;
+            max-width: 100%;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        
         .chat-messages {
-            height: 550px;
+            flex: 1;
             overflow-y: auto;
             padding: 20px;
+            background-color: #f9f9f9;
         }
+        
         .message {
             margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 18px;
             max-width: 80%;
-            word-wrap: break-word;
+            padding: 12px 15px;
+            border-radius: 20px;
+            position: relative;
+            clear: both;
+            animation: fadeIn 0.3s ease-in-out;
         }
-        .user-message {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-            margin-left: auto;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        
         .bot-message {
-            background-color: #f3f4f6;
-            color: #111827;
-            margin-right: auto;
+            background-color: white;
+            border-radius: 18px 18px 18px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            float: right;
+            color: #333;
+            animation: slideIn 0.4s ease-out;
         }
-        .input-area {
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 18px 18px 0 18px;
+            float: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-input {
             display: flex;
             padding: 15px;
-            background-color: #f3f4f6;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+            position: relative;
         }
-        .message-input {
-            flex-grow: 1;
-            padding: 12px 16px;
-            border-radius: 24px;
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
         }
-        .send-button {
-            background-color: #3b82f6;
+        
+        .chat-input input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .chat-input button {
+            background-color: var(--primary-color);
             color: white;
+            border: none;
             border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .chat-input button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .option-button {
+            background-color: white;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .option-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-right: 10px;
+        }
+        
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-button i {
+            margin-left: 5px;
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .progress-container {
+            margin-top: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.5s;
+        }
+        
+        .score-display {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .svg-container {
+            margin: 15px 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .question-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .popup-formula {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        
+        .popup-formula:hover {
+            transform: scale(1.1);
+        }
+        
+        .formula-container {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 99;
+            display: none;
+        }
+        
+        .formula-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .formula-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .formula-item:last-child {
+            border-bottom: none;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px 18px 18px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            float: right;
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #aaa;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: typing-dot 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing-dot {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        /* נגישות ותאימות למכשירים שונים */
+        @media (max-width: 768px) {
+            .chat-container {
+                border-radius: 0;
+                height: 100%;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .option-button {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+        }
+        
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        
+        .hint-container {
+            background-color: #fff9e6;
+            border-left: 3px solid var(--warning-color);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .hint-title {
+            font-weight: bold;
+            color: var(--warning-color);
+            margin-bottom: 5px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--error-color);
+        }
+        
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .numerator, .denominator {
+            display: block;
+        }
+        .numerator {
+            border-bottom: 1px solid;
         }
     </style>
 </head>
 <body>
-    <div class="py-8">
-        <div class="chat-container">
-            <div class="bg-blue-600 text-white py-4 px-6">
-                <h1 class="text-xl font-bold text-center">צ'אטבוט לתרגול מתמטיקה וגיאומטריה</h1>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="navigation-buttons">
+                <button id="back-button" class="nav-button"><i class="fas fa-chevron-right"></i> חזור שלב</button>
+                <button id="restart-button" class="nav-button"><i class="fas fa-redo"></i> התחל מחדש</button>
             </div>
-
-            <!-- אזור הודעות -->
-            <div class="chat-messages" id="chatMessages"></div>
-
-            <!-- אזור קלט -->
-            <div class="input-area">
-                <input type="text" class="message-input" id="messageInput" placeholder="הקלד/י את הודעתך כאן..." autocomplete="off">
-                <button class="send-button" id="sendButton">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-
-            <!-- כפתורי ניווט -->
-            <div class="flex justify-between mt-4 px-6">
-                <button id="backButton" class="option-button hidden">חזרה שלב אחורה</button>
-                <button id="restartButton" class="option-button hidden">חזרה להתחלה</button>
-            </div>
+            <h2>בוט מתמטיקה - עוזר למידה אישי</h2>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input">
+            <button id="send-button" type="button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+            <input type="text" id="user-input" placeholder="הקלד/י הודעה..." autocomplete="off">
         </div>
     </div>
-
-    <!-- JavaScript -->
+    
+    <div class="popup-formula" id="formula-button">
+        <i class="fas fa-calculator"></i>
+    </div>
+    
+    <div class="formula-container" id="formula-container">
+        <div class="formula-title">נוסחאון מתמטי</div>
+        <div id="formula-content"></div>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageInput = document.getElementById('messageInput');
-            const sendButton = document.getElementById('sendButton');
+        // =====================================================
+        // מערכת ניהול צ'אט ותצוגה
+        // =====================================================
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const backButton = document.getElementById('back-button');
+        const restartButton = document.getElementById('restart-button');
+        const formulaButton = document.getElementById('formula-button');
+        const formulaContainer = document.getElementById('formula-container');
+        const formulaContent = document.getElementById('formula-content');
+        
+        let chatState = {
+            currentStage: 'welcome',
+            history: [],
+            userClass: null,
+            userLevel: null,
+            selectedTopic: null,
+            exerciseType: null,
+            currentExercise: null,
+            exerciseHistory: {},
+            score: 0,
+            streak: 0,
+            strengthAreas: {},
+            weaknessAreas: {}
+        };
+        
+        // יוצר מזהה ייחודי
+        function generateId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+        
+        // שומר היסטוריה
+        function saveState() {
+            chatState.history.push(JSON.parse(JSON.stringify({
+                currentStage: chatState.currentStage,
+                userClass: chatState.userClass,
+                userLevel: chatState.userLevel,
+                selectedTopic: chatState.selectedTopic,
+                exerciseType: chatState.exerciseType,
+                currentExercise: chatState.currentExercise
+            })));
             
-            const backButton = document.getElementById('backButton');
-            const restartButton = document.getElementById('restartButton');
-
-            // Bot state and history management
-            let botState = { stage: 'intro', topic: null };
-            let history = [];
-
-            // Event listeners
-            sendButton.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendMessage();
-            });
+            // מגביל את גודל ההיסטוריה ל-20 מצבים
+            if (chatState.history.length > 20) {
+                chatState.history.shift();
+            }
+        }
+        
+        // חוזר שלב אחורה
+        function goBack() {
+            if (chatState.history.length > 0) {
+                const previousState = chatState.history.pop();
+                chatState.currentStage = previousState.currentStage;
+                chatState.userClass = previousState.userClass;
+                chatState.userLevel = previousState.userLevel;
+                chatState.selectedTopic = previousState.selectedTopic;
+                chatState.exerciseType = previousState.exerciseType;
+                chatState.currentExercise = previousState.currentExercise;
+                
+                // מסיר את ההודעה האחרונה מהצאט
+                if (chatMessages.lastChild) {
+                    chatMessages.removeChild(chatMessages.lastChild);
+                }
+                if (chatMessages.lastChild) {
+                    chatMessages.removeChild(chatMessages.lastChild);
+                }
+                
+                // מציג את ההודעה המתאימה לשלב הקודם
+                handleCurrentStage();
+            } else {
+                showNotification('אין עוד לאן לחזור', 'error');
+            }
+        }
+        
+        // מתחיל את הצ'אט מחדש
+        function restartChat() {
+            // מנקה את היסטורית הצ'אט הקודמת
+            chatMessages.innerHTML = '';
             
-            backButton.addEventListener('click', goBack);
-            restartButton.addEventListener('click', goToStart);
+            // איפוס המצב
+            chatState = {
+                currentStage: 'welcome',
+                history: [],
+                userClass: null,
+                userLevel: null,
+                selectedTopic: null,
+                exerciseType: null,
+                currentExercise: null,
+                exerciseHistory: chatState.exerciseHistory,
+                score: chatState.score,
+                streak: 0,
+                strengthAreas: chatState.strengthAreas,
+                weaknessAreas: chatState.weaknessAreas
+            };
+            
+            // מציג הודעת פתיחה
+            handleCurrentStage();
+        }
 
-            // Initial bot message
+        // פונקציה להצגת הודעה
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
             setTimeout(() => {
-                addBotMessage("שלום! אני בוט לימודי שמסייע בתרגול מתמטיקה וגיאומטריה.");
-                setTimeout(() => {
-                    addBotMessage("איזה נושא תרצה/י לתרגל?", ["גיאומטריה", "משולשים", "טריגונומטריה"]);
-                    showNavigationButtons();
-                }, 500);
-            }, 500);
-
-            function sendMessage() {
-                const message = messageInput.value.trim();
-                if (message === '') return;
-
-                addUserMessage(message);
-                messageInput.value = '';
-
-                // Save current state to history
-                history.push(JSON.parse(JSON.stringify(botState)));
-
-                // Process user message
-                processUserMessage(message);
-                showNavigationButtons();
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // מוסיף הודעה לצ'אט
+        function addMessage(text, isUser = false, options = null, hasProgress = false, svgContent = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} clearfix`;
+            
+            // תוכן ההודעה
+            messageDiv.innerHTML = text;
+            
+            // אם יש תוכן SVG, הוסף אותו
+            if (svgContent) {
+                const svgContainer = document.createElement('div');
+                svgContainer.className = 'svg-container';
+                svgContainer.innerHTML = svgContent;
+                messageDiv.appendChild(svgContainer);
             }
-
-            function processUserMessage(message) {
-                setTimeout(() => {
-                    switch (botState.stage) {
-                        case 'intro':
-                            processTopic(message);
-                            break;
-                        default:
-                            addBotMessage("לא הבנתי את ההודעה שלך.");
-                    }
-                }, 500);
-            }
-
-            function processTopic(message) {
-                if (message.includes("גיאומטריה")) {
-                    botState.topic = "גיאומטריה";
-                    botState.stage = "exercise";
-                    addBotMessage("בחר תרגיל בגיאומטריה:", ["שטח", "היקף"]);
-                } else if (message.includes("משולשים")) {
-                    botState.topic = "משולשים";
-                    botState.stage = "exercise";
-                    addBotMessage("בחר תרגיל במשולשים:", ["דמיון", "חפיפה"]);
-                } else if (message.includes("טריגונומטריה")) {
-                    botState.topic = "טריגונומטריה";
-                    botState.stage = "exercise";
-                    addBotMessage("בחר תרגיל בטריגונומטריה:", ["סינוס", "קוסינוס"]);
-                } else {
-                    addBotMessage("לא הבנתי את הנושא שבחרת.");
-                }
-                showNavigationButtons();
-            }
-
-            function goBack() {
-                if (history.length > 0) {
-                    botState = history.pop();
-                    chatMessages.innerHTML = ''; // Clear messages
-                    addBotMessage("חזרת לשלב הקודם.");
-                } else {
-                    addBotMessage("אין שלבים קודמים לחזור אליהם.");
-                    hideNavigationButtons();
-                }
-                showNavigationButtons();
-            }
-
-            function goToStart() {
-                botState = { stage: 'intro', topic: null };
-                history = [];
-                chatMessages.innerHTML = ''; // Clear messages
-                addBotMessage("התחלת מחדש.");
+            
+            // מוסיף אפשרויות אם יש
+            if (options) {
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options-container';
                 
-                setTimeout(() => {
-                    addBotMessage("איזה נושא תרצה/י לתרגל?", ["גיאומטריה", "משולשים", "טריגונומטריה"]);
-                    showNavigationButtons();
-                }, 500);
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option-button';
+                    button.textContent = option.text;
+                    button.addEventListener('click', () => option.handler());
+                    optionsContainer.appendChild(button);
+                });
                 
-                hideNavigationButtons();
+                messageDiv.appendChild(optionsContainer);
             }
-
-            function showNavigationButtons() {
-                backButton.classList.remove('hidden');
-                restartButton.classList.remove('hidden');
+            
+            // מוסיף מדד התקדמות אם צריך
+            if (hasProgress) {
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'progress-container';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressBar.style.width = `${Math.min(chatState.score, 100)}%`;
+                
+                progressContainer.appendChild(progressBar);
+                messageDiv.appendChild(progressContainer);
+                
+                const scoreDisplay = document.createElement('div');
+                scoreDisplay.className = 'score-display';
+                scoreDisplay.textContent = `ניקוד: ${chatState.score} | רצף נכונות: ${chatState.streak}`;
+                messageDiv.appendChild(scoreDisplay);
             }
-
-            function hideNavigationButtons() {
-                backButton.classList.add('hidden');
-                restartButton.classList.add('hidden');
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // מציג אינדיקטור הקלדה בזמן "חשיבה" של הבוט
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator clearfix';
+            indicator.id = 'typing-indicator';
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                indicator.appendChild(dot);
             }
-
-            function addBotMessage(message, options = []) {
-                const botDiv = document.createElement('div');
-                botDiv.className = 'bot-message message';
-                
-                botDiv.innerHTML = `<p>${message}</p>`;
-                
-                if (options.length > 0) {
-                    const optionsContainer = document.createElement('div');
-                    
-                    options.forEach(option => {
-                        const button = document.createElement('button');
-                        button.className = 'option-button';
-                        button.textContent = option;
-                        button.onclick = () => sendMessage(option);
-                        optionsContainer.appendChild(button);
-                    });
-                    
-                    botDiv.appendChild(optionsContainer);
-                }
-                
-                chatMessages.appendChild(botDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            
+            chatMessages.appendChild(indicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return indicator;
+        }
+        
+        // מסיר את אינדיקטור ההקלדה
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                chatMessages.removeChild(indicator);
             }
-
-            function addUserMessage(message) {
-                const userDiv = document.createElement('div');
-                userDiv.className = 'user-message message';
-                
-                userDiv.textContent = message;
-
-                chatMessages.appendChild(userDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-           }
-       });
-   </script>
-</body>
-</html>
+        }
+        
+        // =====================================================
+        // מאגר תוכן לימודי
+        // =====================================================
+        
+        // -----------------------------------------------
+        // מידע בסיסי על נושאים
+        // -----------------------------------------------
+        const topicInfo = {
+            geometry_basics: {
+                title: "מושגי יסוד בגיאומטריה",
+                intro: `
+                    <p>גיאומטריה היא ענף במתמטיקה העוסק בתכונות של צורות, גדלים, מרחקים ויחסים במרחב.</p>
+                    <p>נלמד על המושגים הבסיסיים כמו:</p>
+                    <ul>
+                        <li>נקודה, ישר וקרן</li>
+                        <li>זוויות וסוגיהן</li>
+                        <li>מקבילות וניצבות</li>
+                        <li>צורות מישוריות בסיסיות</li>
+                    </ul>
+                    <p>הבנת מושגים אלו חיונית להמשך לימודי הגיאומטריה והטריגונומטריה.</p>
+                `,
+                formulas: [
+                    { name: "זווית ישרה", formula: "90°" },
+                    { name: "זווית שטוחה", formula: "180°" },
+                    { name: "זווית קהה", formula: "גדולה מ-90° וקטנה מ-180°" },
+                    { name: "זווית חדה", formula: "קטנה מ-90°" },
+                    { name: "סכום זוויות צמודות", formula: "180°" },
+                    { name: "סכום זוויות מתחלפות", formula: "זוויות שוות כאשר שני קווים מקבילים" }
+                ]
+            },
+            triangles: {
+                title: "משולשים - סוגים ותכונות",
+                intro: `
+                    <p>משולש הוא צורה הנוצרת ע״י חיבור של שלוש נקודות שאינן על ישר אחד.</p>
+                    <p>נלמד על:</p>
+                    <ul>
+                        <li>סוגי משולשים: שווה-צלעות, שווה-שוקיים, ישר-זווית</li>
+                        <li>סכום זוויות במשולש</li>
+                        <li>תכונות מיוחדות של משולשים</li>
+                        <li>משפט פיתגורס במשולש ישר זווית</li>
+                    </ul>
+                    <p>תכונות המשולש חשובות להבנת יחסים גיאומטריים מורכבים יותר.</p>
+                `,
+                formulas: [
+                    { name: "סכום זוויות במשולש", formula: "180°" },
+                    { name: "שטח משולש", formula: "(בסיס × גובה) ÷ 2" },
+                    { name: "משפט פיתגורס", formula: "a² + b² = c² (במשולש ישר זווית)" },
+                    { name: "היקף משולש", formula: "צלע א + צלע ב + צלע ג" },
+                    { name: "זוויות במשולש שווה שוקיים", formula: "זוויות הבסיס שוות זו לזו" },
+                    { name: "זוויות במשולש שווה צלעות", formula: "כל זווית שווה 60°" }
+                ]
+            },
+            triangle_similarity: {
+                title: "דמיון משולשים",
+                intro: `
+                    <p>שני משולשים דומים אם הזוויות שלהם שוות בהתאמה והצלעות פרופורציוניות.</p>
+                    <p>נלמד על:</p>
+                    <ul>
+                        <li>תנאים לדמיון משולשים</li>
+                        <li>יחס שטחים במשולשים דומים</li>
+                        <li>יישומים של דמיון משולשים</li>
+                    </ul>
+                    <p>דמיון משולשים הוא כלי חשוב לפתרון בעיות בגיאומטריה.</p>
+                `,
+                formulas: [
+                    { name: "תנאי דמיון (זווית-זווית)", formula: "שתי זוויות שוות בין שני משולשים" },
+                    { name: "תנאי דמיון (צלע-זווית-צלע)", formula: "שתי צלעות פרופורציוניות והזווית ביניהן שווה" },
+                    { name: "יחס שטחים במשולשים דומים", formula: "יחס השטחים = (יחס הצלעות)²" },
+                    { name: "יחס היקפים במשולשים דומים", formula: "יחס ההיקפים = יחס הצלעות" }
+                ]
+            },
+            triangle_congruence: {
+                title: "חפיפת משולשים",
+                intro: `
+                    <p>שני משולשים חופפים אם ניתן להניח אותם זה על גבי זה כך שיכסו זה את זה בדיוק.</p>
+                    <p>נלמד על:</p>
+                    <ul>
+                        <li>משפטי חפיפה: צלע-זווית-צלע (צ.ז.צ), צלע-צלע-צלע (צ.צ.צ), זווית-צלע-זווית (ז.צ.ז)</li>
+                        <li>שימושים של חפיפת משולשים</li>
+                    </ul>
+                    <p>חפיפת משולשים מאפשרת להוכיח שוויון בין חלקים שונים של צורות גיאומטריות.</p>
+                `,
+                formulas: [
+                    { name: "משפט חפיפה צ.ז.צ", formula: "שתי צלעות והזווית שביניהן" },
+                    { name: "משפט חפיפה צ.צ.צ", formula: "שלוש צלעות" },
+                    { name: "משפט חפיפה ז.צ.ז", formula: "שתי זוויות והצלע המשותפת" },
+                    { name: "משפט חפיפה צ.צ.ז", formula: "שתי צלעות והזווית מול הצלע הגדולה" }
+                ]
+            },
+            geometric_shapes: {
+                title: "צורות גיאומטריות - שטחים והיקפים",
+                intro: `
+                    <p>בגיאומטריה אנו עוסקים במגוון צורות והתכונות שלהן.</p>
+                    <p>נלמד לחשב:</p>
+                    <ul>
+                        <li>שטחים והיקפים של מצולעים: ריבוע, מלבן, מעוין, טרפז</li>
+                        <li>שטח והיקף של מעגל</li>
+                        <li>נפח של גופים: תיבה, גליל, חרוט, כדור</li>
+                    </ul>
+                    <p>הבנת שטחים, היקפים ונפחים חיונית ליישומים מעשיים רבים.</p>
+                `,
+                formulas: [
+                    { name: "שטח ריבוע", formula: "צלע²" },
+                    { name: "שטח מלבן", formula: "אורך × רוחב" },
+                    { name: "היקף מלבן", formula: "2 × (אורך + רוחב)" },
+                    { name: "שטח מעגל", formula: "π × רדיוס²" },
+                    { name: "היקף מעגל", formula: "2π × רדיוס" },
+                    {  
